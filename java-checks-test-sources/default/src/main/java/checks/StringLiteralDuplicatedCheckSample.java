@@ -191,4 +191,19 @@ class DuplicatedExceptionArguments {
   private int reportConstantsForArguments(int k) {
     throw new RuntimeException("Will do it on Tuesday!"); // Noncompliant {{Use already-defined constant 'NOT_IMPLEMENTED_MESSAGE' instead of duplicating its value here.}}
   }
+
+  private void devNull(String s, int i) {
+  }
+
+  private void reportCorrectCount(int r) {
+    if (r == 1) {
+      throw new RuntimeException("message shared between exception and fun calls"); // Noncompliant {{Define a constant instead of duplicating this literal "message shared between exception and fun calls" 4 times.}}
+    } else if (r == 2) {
+      devNull("message shared between exception and fun calls", 2);
+    } else if  (r == 3) {
+      devNull("message shared between exception and fun calls", 3);
+    } else {
+      devNull("message shared between exception and fun calls", 4);
+    }
+  }
 }

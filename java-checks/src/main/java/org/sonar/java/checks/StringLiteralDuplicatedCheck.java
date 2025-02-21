@@ -62,16 +62,17 @@ public class StringLiteralDuplicatedCheck extends BaseTreeVisitor implements Jav
     constants.clear();
     scan(context.getTree());
     occurrences.forEach((key, literalTrees) -> {
+      int literalOccurrence = literalTrees.size();
       // Do not consider `throw new Exception("repeated message")` for reporting duplicates,
       // but still report it if a constant is available.
-      int literalOccurrence = (int) literalTrees.stream().filter(tree -> !isThrowableArgument(tree)).count();
+      int triggeringOccurrences = (int) literalTrees.stream().filter(tree -> !isThrowableArgument(tree)).count();
       if (constants.containsKey(key)) {
         VariableTree constant = constants.get(key);
         List<LiteralTree> duplications = literalTrees.stream().filter(literal -> literal.parent() != constant).toList();
         context.reportIssue(this, duplications.iterator().next(),
           "Use already-defined constant '" + constant.simpleName() + "' instead of duplicating its value here.",
           secondaryLocations(duplications.subList(1, duplications.size())), literalOccurrence);
-      } else if (literalOccurrence >= threshold) {
+      } else if (triggeringOccurrences >= threshold) {
         LiteralTree literalTree = literalTrees.iterator().next();
         String message = literalTree.is(Tree.Kind.TEXT_BLOCK) ? ("Define a constant instead of duplicating this text block " + literalOccurrence + " times.")
           : ("Define a constant instead of duplicating this literal \"" + key + "\" " + literalOccurrence + " times.");
